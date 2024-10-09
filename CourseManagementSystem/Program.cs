@@ -11,6 +11,7 @@ namespace CourseManagementSystem
         static void Main(string[] args)
         {
             CourseRepository repository = new CourseRepository();
+            repository.InitializeDatabase(); // Initialize the database and table
             int choice;
 
             do

@@ -9,11 +9,43 @@ namespace CourseManagementSystem
 {
     public class CourseRepository
     {
-        private string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=CourseManagement;Trusted_Connection=True;";
+        private string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=master;Trusted_Connection=True;";
+
+        public void InitializeDatabase()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string createDatabaseQuery = "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CourseManagement') " +
+                                              "BEGIN CREATE DATABASE CourseManagement END";
+                string createTableQuery = @"
+                    USE CourseManagement;
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Courses')
+                    BEGIN
+                        CREATE TABLE Courses (
+                            CourseId INT IDENTITY(1,1) PRIMARY KEY,
+                            Title NVARCHAR(255) NOT NULL,
+                            Duration NVARCHAR(100) NOT NULL,
+                            Price DECIMAL(18, 2) NOT NULL
+                        );
+                    END";
+
+                conn.Open();
+
+                using (SqlCommand cmd = new SqlCommand(createDatabaseQuery, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                using (SqlCommand cmd = new SqlCommand(createTableQuery, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
 
         public void AddCourse(Course course)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(@"Server=(localdb)\MSSQLLocalDB;Database=CourseManagement;Trusted_Connection=True;"))
             {
                 string query = "INSERT INTO Courses (Title, Duration, Price) VALUES (@Title, @Duration, @Price)";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -30,7 +62,7 @@ namespace CourseManagementSystem
         public List<Course> GetAllCourses()
         {
             List<Course> courses = new List<Course>();
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(@"Server=(localdb)\MSSQLLocalDB;Database=CourseManagement;Trusted_Connection=True;"))
             {
                 string query = "SELECT * FROM Courses";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -54,7 +86,7 @@ namespace CourseManagementSystem
 
         public void UpdateCourse(Course course)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(@"Server=(localdb)\MSSQLLocalDB;Database=CourseManagement;Trusted_Connection=True;"))
             {
                 string query = "UPDATE Courses SET Title = @Title, Duration = @Duration, Price = @Price WHERE CourseId = @CourseId";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -71,7 +103,7 @@ namespace CourseManagementSystem
 
         public void DeleteCourse(int courseId)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(@"Server=(localdb)\MSSQLLocalDB;Database=CourseManagement;Trusted_Connection=True;"))
             {
                 string query = "DELETE FROM Courses WHERE CourseId = @CourseId";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -85,7 +117,7 @@ namespace CourseManagementSystem
 
         public Course GetCourseById(int courseId)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(@"Server=(localdb)\MSSQLLocalDB;Database=CourseManagement;Trusted_Connection=True;"))
             {
                 string query = "SELECT * FROM Courses WHERE CourseId = @CourseId";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
